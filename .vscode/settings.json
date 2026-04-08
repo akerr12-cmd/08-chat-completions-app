@@ -1,0 +1,13 @@
+{
+  "files.exclude": {
+    "**/.git": false,
+    "**/.github": false,
+    "**/.devcontainer": false
+  },
+  "search.exclude": {
+    "**/.git": false,
+    "**/.github": false,
+    "**/.devcontainer": false
+  },
+  "explorer.excludeGitIgnore": false
+}
