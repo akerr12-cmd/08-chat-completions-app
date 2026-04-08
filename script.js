@@ -15,8 +15,9 @@ const systemMessage = {
   content: 'You are a friendly Budget Travel Planner, specializing in cost-conscious travel advice. You help users find cheap flights, budget-friendly accommodations, affordable itineraries, and low-cost activities in their chosen destination. If a user\'s query is unrelated to budget travel, respond by stating that you do not know.'
 };
 
-// This function sends the conversation history to the OpenAI Chat Completions API.
-// It returns the assistant reply so the page can show it directly to the user.
+// Sends the current conversation to OpenAI and gets back one assistant response.
+// Uses the global `apiKey` from `secrets.js` in the Authorization header.
+// Returns only the assistant text (not the full API JSON object).
 async function sendChatMessage() {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -35,12 +36,17 @@ async function sendChatMessage() {
     throw new Error(`OpenAI request failed with status ${response.status}`);
   }
 
+  // Convert the JSON response body into a JavaScript object.
   const result = await response.json();
+
+  // Return the assistant's message text from the first choice in the response.
   return result.choices[0].message.content;
 }
 
-// This function redraws the conversation area so the user can see every message in order.
+// Rebuilds the chat area from scratch using `conversationDisplay`.
+// This keeps the UI in sync with the current conversation state.
 function renderConversation() {
+  // Clear old chat HTML before drawing all messages again.
   responseContainer.innerHTML = '';
 
   conversationDisplay.forEach((message) => {
@@ -60,8 +66,10 @@ function renderConversation() {
   });
 }
 
-// This function runs every time the form is submitted.
-// It sends the user's message, waits for the assistant reply, and puts that reply on the page.
+// Runs when the user submits the chat form.
+// Steps: validate input, add the user's message, show a loading message,
+// call the API, then replace loading text with the assistant reply.
+// `event` is the submit event object passed by the browser.
 async function handleSubmit(event) {
   event.preventDefault();
 
@@ -98,6 +106,7 @@ async function handleSubmit(event) {
   renderConversation();
 
   try {
+    // Wait for the API call, then store the assistant's final text.
     const assistantReply = await sendChatMessage();
 
     // Replace the temporary loading message with the real assistant reply.
